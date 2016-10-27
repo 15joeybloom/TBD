@@ -1,0 +1,8 @@
+/*
+!/.gitignore
+!/simpledb
+/simpledb/*
+!/simpledb/parse
+/simpledb/parse/*
+!/simpledb/parse/Lexer.java
+!/simpledb/parse/Parser.java
