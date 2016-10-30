@@ -1,5 +1,6 @@
 /*
-!/.gitignore
+!compile_start_run.sh
+!.gitignore
 !/simpledb
 /simpledb/*
 !/simpledb/parse
