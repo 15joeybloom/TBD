@@ -1,7 +1,7 @@
 #! /usr/bin/bash
 fuser -k 1099/tcp
 
-javac -cp . simpledb/*/*.java simpledb/*/*/*.java
+javac -Xlint:unchecked -cp . simpledb/*/*.java simpledb/*/*/*.java
 javac -cp . studentClient/simpledb/*.java
 
 java simpledb.server.Startup studentdb &
