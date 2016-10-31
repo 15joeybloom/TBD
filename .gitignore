@@ -7,3 +7,4 @@
 /simpledb/parse/*
 !/simpledb/parse/Lexer.java
 !/simpledb/parse/Parser.java
+!/simpledb/parse/AggQueryData.java

@@ -55,7 +55,9 @@ public class Parser {
    
    public QueryData query() {
       lex.eatKeyword("select");
-      Collection<String> fields = selectList();
+      List<Collection<String> > selectL = selectList();
+      Collection<String> aggs = selectL.get(0), 
+        fields = selectL.get(1);
       lex.eatKeyword("from");
       Collection<String> tables = tableList();
       Predicate pred = new Predicate();
@@ -63,17 +65,34 @@ public class Parser {
          lex.eatKeyword("where");
          pred = predicate();
       }
-      return new QueryData(fields, tables, pred);
+      //if aggs contains only nulls, then this is a basic
+      //query, not an aggregation query
+      if(Collections.singleton(null).containsAll(aggs))
+          return new QueryData(fields, tables, pred);
+        else
+            return new AggQueryData(aggs, fields, tables, pred);
    }
    
-   private Collection<String> selectList() {
+   private List<Collection<String> > selectList() {
+      Collection<String> aggL = new ArrayList<String>();
       Collection<String> L = new ArrayList<String>();
-      L.add(field());
+      if(lex.matchAggFunction()) {
+            aggL.add(lex.eatAggFunction());
+            lex.eatOpenParen();
+            L.add(field());
+            lex.eatCloseParen();
+        }
+        else {
+            aggL.add(null);
+            L.add(field());
+        }
       if (lex.matchDelim(',')) {
          lex.eatDelim(',');
-         L.addAll(selectList());
+         List<Collection<String> > selectL = selectList();
+         aggL.addAll(selectL.get(0));
+         L.addAll(selectL.get(1));
       }
-      return L;
+      return Arrays.asList(aggL, L);
    }
    
    private Collection<String> tableList() {

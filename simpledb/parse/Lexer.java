@@ -9,6 +9,7 @@ import java.io.*;
  */
 public class Lexer {
    private Collection<String> keywords;
+   private Collection<String> aggFunctions;
    private StreamTokenizer tok;
    
    /**
@@ -19,6 +20,10 @@ public class Lexer {
       initKeywords();
       tok = new StreamTokenizer(new StringReader(s));
       tok.ordinaryChar('.');
+      //this way, open and close parens will be tokenized
+      //as word by themselves
+      tok.ordinaryChar('(');
+      tok.ordinaryChar(')');
       tok.lowerCaseMode(true); //ids and keywords are converted
       nextToken();
    }
@@ -67,6 +72,30 @@ public class Lexer {
    public boolean matchId() {
       return  tok.ttype==StreamTokenizer.TT_WORD && !keywords.contains(tok.sval);
    }
+
+   /**
+    * Returns true if the current token is a legal aggregation function.
+    * @return true if the current token is an aggregation function
+    */
+   public boolean matchAggFunction() {
+        return tok.ttype==StreamTokenizer.TT_WORD && aggFunctions.contains(tok.sval);
+    }
+
+    /**
+     * Returns true if the current token is an open paren.
+     * @return true if the current token is an open paren.
+     */
+    public boolean matchOpenParen() {
+        return tok.ttype==StreamTokenizer.TT_WORD && tok.sval.equals("(");
+    }
+   
+    /**
+     * Returns true if the current token is a close paren.
+     * @return true if the current token is a close paren.
+     */
+    public boolean matchCloseParen() {
+        return tok.ttype==StreamTokenizer.TT_WORD && tok.sval.equals(")");
+    }
    
 //Methods to "eat" the current token
    
@@ -136,6 +165,43 @@ public class Lexer {
       nextToken();
       return s;
    }
+
+    /**
+     * Throws an exception if the current token is not
+     * an aggregation function.
+     * Otherwise, returns the aggregation function as a string
+     * and moves to the next token.
+     * @return the string value of the current token
+     */
+   public String eatAggFunction() {
+        if(!matchAggFunction())
+            throw new BadSyntaxException();
+        String s = tok.sval;
+        nextToken();
+        return s;
+    }
+
+    /**
+     * Throws an exception if the current token is not
+     * an open paren.
+     * Otherwise, moves to the next token.
+     */
+    public void eatOpenParen() {
+        if(!matchOpenParen())
+            throw new BadSyntaxException();
+        nextToken();
+    }
+
+    /**
+     * Throws an exception if the current token is not
+     * a close paren.
+     * Otherwise, moves to the next token.
+     */
+    public void eatCloseParen() {
+        if(!matchCloseParen())
+            throw new BadSyntaxException();
+        nextToken();
+    }
    
    private void nextToken() {
       try {
@@ -150,5 +216,8 @@ public class Lexer {
       keywords = Arrays.asList("select", "from", "where", "and",
                                "insert", "into", "values", "delete", "update", "set", 
                                "create", "table", "int", "varchar", "view", "as", "index", "on");
+   }
+   private void initAggFunctions() {
+        aggFunctions = Arrays.asList("max", "min", "sum", "avg", "count");
    }
 }
