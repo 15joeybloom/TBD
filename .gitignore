@@ -1,5 +1,6 @@
 /*
 !compile_start_run.sh
+!create_studentdb.sh
 !.gitignore
 !/simpledb
 /simpledb/*
