@@ -4,7 +4,10 @@
 !/simpledb
 /simpledb/*
 !/simpledb/parse
+!/simpledb/planner
 /simpledb/parse/*
+/simpledb/planner/*
 !/simpledb/parse/Lexer.java
 !/simpledb/parse/Parser.java
 !/simpledb/parse/AggQueryData.java
+!/simpledb/planner/AggQueryPlanner.java
