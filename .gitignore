@@ -7,9 +7,13 @@
 /simpledb/*
 !/simpledb/parse
 !/simpledb/planner
+!/simpledb/server
 /simpledb/parse/*
 /simpledb/planner/*
+/simpledb/server/*
 !/simpledb/parse/Lexer.java
 !/simpledb/parse/Parser.java
 !/simpledb/parse/AggQueryData.java
 !/simpledb/planner/AggQueryPlanner.java
+!/simpledb/planner/Planner.java
+!/simpledb/server/SimpleDB.java

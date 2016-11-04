@@ -18,6 +18,7 @@ public class Lexer {
     */
    public Lexer(String s) {
       initKeywords();
+      initAggFunctions();
       tok = new StreamTokenizer(new StringReader(s));
       tok.ordinaryChar('.');
       //this way, open and close parens will be tokenized
@@ -81,21 +82,26 @@ public class Lexer {
         return tok.ttype==StreamTokenizer.TT_WORD && aggFunctions.contains(tok.sval);
     }
 
+
     /**
      * Returns true if the current token is an open paren.
      * @return true if the current token is an open paren.
      */
+    /*
     public boolean matchOpenParen() {
         return tok.ttype==StreamTokenizer.TT_WORD && tok.sval.equals("(");
     }
+    */
    
     /**
      * Returns true if the current token is a close paren.
      * @return true if the current token is a close paren.
      */
+    /*
     public boolean matchCloseParen() {
         return tok.ttype==StreamTokenizer.TT_WORD && tok.sval.equals(")");
     }
+    */
    
 //Methods to "eat" the current token
    
@@ -186,22 +192,26 @@ public class Lexer {
      * an open paren.
      * Otherwise, moves to the next token.
      */
+    /*
     public void eatOpenParen() {
         if(!matchOpenParen())
             throw new BadSyntaxException();
         nextToken();
     }
+    */
 
     /**
      * Throws an exception if the current token is not
      * a close paren.
      * Otherwise, moves to the next token.
      */
+    /*
     public void eatCloseParen() {
         if(!matchCloseParen())
             throw new BadSyntaxException();
         nextToken();
     }
+    */
    
    private void nextToken() {
       try {

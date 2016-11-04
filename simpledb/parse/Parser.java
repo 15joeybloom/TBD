@@ -78,9 +78,11 @@ public class Parser {
       Collection<String> L = new ArrayList<String>();
       if(lex.matchAggFunction()) {
             aggL.add(lex.eatAggFunction());
-            lex.eatOpenParen();
+            //lex.eatOpenParen();
+            lex.eatDelim('(');
             L.add(field());
-            lex.eatCloseParen();
+            //lex.eatCloseParen();
+            lex.eatDelim(')');
         }
         else {
             aggL.add(null);

@@ -44,6 +44,7 @@ public class AggQueryPlanner extends BasicQueryPlanner {
       return p;
       */
         //Step 5: Perform the aggregation
-        p = new AggPlan(p, data.aggFunctions());
+        p = new AggregatePlan(p, data.fields(), data.aggFunctions());
+        return p;
    }
 }

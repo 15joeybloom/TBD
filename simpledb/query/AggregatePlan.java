@@ -11,7 +11,7 @@ import java.util.Collection;
 public class AggregatePlan implements Plan {
    private Plan p;
    private Schema schema = new Schema();
-   private Colelction<String> aggfns;
+   private Collection<String> aggfns;
    
    /**
     * Creates a new aggregate node in the query tree,
