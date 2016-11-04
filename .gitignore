@@ -8,12 +8,17 @@
 !/simpledb/parse
 !/simpledb/planner
 !/simpledb/server
+!/simpledb/query
 /simpledb/parse/*
 /simpledb/planner/*
 /simpledb/server/*
+/simpledb/query/*
 !/simpledb/parse/Lexer.java
 !/simpledb/parse/Parser.java
 !/simpledb/parse/AggQueryData.java
 !/simpledb/planner/AggQueryPlanner.java
 !/simpledb/planner/Planner.java
 !/simpledb/server/SimpleDB.java
+!/simpledb/query/AggregatePlan.java
+!/simpledb/query/AggregateScan.java
+
