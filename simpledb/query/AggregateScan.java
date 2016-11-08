@@ -32,13 +32,17 @@ public class AggregateScan implements Scan {
         this.counts = new ArrayList<>(Collections.nCopies(fieldlist.size(), 0));
         this.called = false;
 
-        for(int i = 0; i < aggfns.size(); i++) {
-            if(aggfns.get(i).equals("min")) {
-                accumulators.set(i, Integer.MAX_VALUE);
-            }
-            else if(aggfns.get(i).equals("max")) {
-                accumulators.set(i, Integer.MIN_VALUE);
-            }
+		Iterator<String> aggfnIt = aggfns.iterator();
+		int index = 0;
+		while(aggfnIt.hasNext()) {
+			String aggfn = aggfnIt.next();
+			if(aggfn.equals("min")) {
+				accumulators.set(index, Integer.MAX_VALUE);
+			}
+			else if(aggfn.equals("max")) {
+		        accumulators.set(index, Integer.MIN_VALUE);
+			}
+			index++;
         }
     }
 
@@ -92,14 +96,13 @@ public class AggregateScan implements Scan {
                         accumulator = value;
                 }
                 else { //unrecognized agg function
-                    //uh... what to do here?
                     throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
                 }
-
                 accumulatorsIt.set(accumulator);
                 countsIt.set(count);
             }
         }
+
         return true;
     }
 
