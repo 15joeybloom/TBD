@@ -2,6 +2,7 @@ package simpledb.query;
 
 import simpledb.record.Schema;
 import java.util.Collection;
+import java.util.Iterator;
 
 /** The Plan class corresponding to the <i>aggregate</i>
   * relational algebra operator.
@@ -11,6 +12,7 @@ import java.util.Collection;
 public class AggregatePlan implements Plan {
    private Plan p;
    private Schema schema = new Schema();
+   private Collection<String> fieldlist;
    private Collection<String> aggfns;
    
    /**
@@ -23,8 +25,13 @@ public class AggregatePlan implements Plan {
     */
     public AggregatePlan(Plan p, Collection<String> fieldlist, Collection<String> aggfns) {
       this.p = p;
-      for (String fldname : fieldlist)
-         schema.add(fldname, p.schema());
+      Iterator<String> fieldlistIt, aggfnsIt;
+      fieldlistIt = fieldlist.iterator();
+      aggfnsIt = aggfns.iterator();
+      while(fieldlistIt.hasNext() && aggfnsIt.hasNext()) {
+         schema.addIntField(aggfnsIt.next() + "("+fieldlistIt.next()+")");
+      }
+      this.fieldlist = fieldlist;
       this.aggfns = aggfns;
    }
 
@@ -34,7 +41,7 @@ public class AggregatePlan implements Plan {
     */
    public Scan open() {
       Scan s = p.open();
-      return new AggregateScan(s, schema.fields(), aggfns);
+      return new AggregateScan(s, schema.fields(), fieldlist, aggfns);
    }
 
    /**
@@ -61,17 +68,15 @@ public class AggregatePlan implements Plan {
     ///////
    /**
     * Estimates the number of distinct field values
-    * in the aggregation,
-    * which is the same as in the underlying query.
+    * in the aggregation, which is always 1.
     * @see simpledb.query.Plan#distinctValues(java.lang.String)
     */
    public int distinctValues(String fldname) {
-      return p.distinctValues(fldname);
+        return 1;
    }
 
    /**
-    * Returns the schema of the projection,
-    * which is taken from the field list.
+    * Returns the schema of the aggregation.
     * @see simpledb.query.Plan#schema()
     */
    public Schema schema() {

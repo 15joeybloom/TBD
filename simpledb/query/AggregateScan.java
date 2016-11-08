@@ -11,6 +11,7 @@ import java.util.*;
  */
 public class AggregateScan implements Scan {
     private Scan s;
+    private Collection<String> schemaFieldList;
     private Collection<String> fieldlist;
     private Collection<String> aggfns;
     private List<Integer> accumulators, counts;
@@ -24,25 +25,26 @@ public class AggregateScan implements Scan {
      * @param fieldlist the list of field names
      * @param aggfns the aggregation functions list
      */
-    public AggregateScan(Scan s, Collection<String> fieldlist, Collection<String> aggfns) {
+    public AggregateScan(Scan s, Collection<String> schemaFieldList, Collection<String> fieldlist, Collection<String> aggfns) {
         this.s = s;
+        this.schemaFieldList = schemaFieldList;
         this.fieldlist = fieldlist;
         this.aggfns = aggfns;
         this.accumulators = new ArrayList<>(Collections.nCopies(fieldlist.size(), 0));
         this.counts = new ArrayList<>(Collections.nCopies(fieldlist.size(), 0));
         this.called = false;
 
-		Iterator<String> aggfnIt = aggfns.iterator();
-		int index = 0;
-		while(aggfnIt.hasNext()) {
-			String aggfn = aggfnIt.next();
-			if(aggfn.equals("min")) {
-				accumulators.set(index, Integer.MAX_VALUE);
-			}
-			else if(aggfn.equals("max")) {
-		        accumulators.set(index, Integer.MIN_VALUE);
-			}
-			index++;
+        Iterator<String> aggfnIt = aggfns.iterator();
+        int index = 0;
+        while(aggfnIt.hasNext()) {
+            String aggfn = aggfnIt.next();
+            if(aggfn.equals("min")) {
+                accumulators.set(index, Integer.MAX_VALUE);
+            }
+            else if(aggfn.equals("max")) {
+                accumulators.set(index, Integer.MIN_VALUE);
+            }
+            index++;
         }
     }
 
@@ -125,7 +127,7 @@ public class AggregateScan implements Scan {
      */
     public int getInt(String fldname) {
         Iterator<String> fieldIt, aggfnIt;
-        fieldIt = fieldlist.iterator();
+        fieldIt = schemaFieldList.iterator();
         aggfnIt = aggfns.iterator();
         ListIterator<Integer> accumulatorsIt, countsIt;
         accumulatorsIt = accumulators.listIterator();
@@ -201,6 +203,6 @@ public class AggregateScan implements Scan {
      * @see simpledb.query.Scan#hasField(java.lang.String)
      */
     public boolean hasField(String fldname) {
-        return fieldlist.contains(fldname);
+        return schemaFieldList.contains(fldname);
     }
 }
