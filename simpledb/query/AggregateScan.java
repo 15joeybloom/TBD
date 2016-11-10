@@ -155,6 +155,7 @@ public class AggregateScan implements Scan {
         throw new RuntimeException("field " + fldname + " not found.");
     }
 
+/*
     public double aggregateInt(String fldname, String aggfn) {
         //general accumulator variables to handle each aggfn
         int accumulator = 0; //value
@@ -189,6 +190,7 @@ public class AggregateScan implements Scan {
         else //should be literally impossible to get here
             return -1; //what do we do though?
     }
+    */
 
     //Not sure if this method should even exist in AggScan
     //It it should, it should be similar to above, just using
