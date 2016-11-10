@@ -1,0 +1,7 @@
+
+SQL> 
+min(majorid)
+------
+    10
+
+SQL> 

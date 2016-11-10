@@ -1,0 +1,7 @@
+
+SQL> 
+max(majorid)
+------
+    30
+
+SQL> 

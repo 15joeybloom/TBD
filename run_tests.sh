@@ -14,10 +14,14 @@ for ofilename in tests/*.txt; do
             echo "Matching Output File '" $expected"' not found."
         else
             rm -rf "tests/temp.txt"
+            rm -rf "tests/temp2.txt"
             echo "- - -"
             cat "tests/"$filename".txt"
+            cat "tests/"$filename".txt" > "tests/temp2.txt"
+            echo "exit" >> "tests/temp2.txt"
+            #cat "tests/temp2.txt"
             echo "- - -"
-            ./run_interpreter.sh < "tests/"$filename".txt" > "tests/temp.txt"
+            ./run_interpreter.sh < "tests/temp2.txt" > "tests/temp.txt"
             if ! cmp "tests/temp.txt" $expected >/dev/null 2>&1
             then
                 echo "Test Differed from Expected Output"
@@ -29,6 +33,7 @@ for ofilename in tests/*.txt; do
             #cat "tests/temp.txt"
             #diff "tests/temp.txt" "tests/"$filename".txt"
             rm -rf "tests/temp.txt"
+            rm -rf "tests/temp2.txt"
             #diff "tests/temp.txt" "tests/"$filename".txt"
             #echo "File Found!"
         fi
