@@ -6,15 +6,19 @@
 !.gitignore
 !/simpledb
 !/tests
+!/studentClient
 /simpledb/*
+/studentClient/*
 !/simpledb/parse
 !/simpledb/planner
 !/simpledb/server
 !/simpledb/query
+!/studentClient/simpledb
 /simpledb/parse/*
 /simpledb/planner/*
 /simpledb/server/*
 /simpledb/query/*
+/studentClient/simpledb/*
 !/simpledb/parse/Lexer.java
 !/simpledb/parse/Parser.java
 !/simpledb/parse/AggQueryData.java
@@ -23,4 +27,5 @@
 !/simpledb/server/SimpleDB.java
 !/simpledb/query/AggregatePlan.java
 !/simpledb/query/AggregateScan.java
+!/studentClient/simpledb/CreateStudentDB.java
 
