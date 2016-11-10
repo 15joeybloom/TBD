@@ -2,8 +2,10 @@
 !compile_start_run.sh
 !create_studentdb.sh
 !run_interpreter.sh
+!run_tests.sh
 !.gitignore
 !/simpledb
+!/tests
 /simpledb/*
 !/simpledb/parse
 !/simpledb/planner
