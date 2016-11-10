@@ -3,6 +3,8 @@ package simpledb.query;
 import simpledb.record.Schema;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.HashMap;
 
 /** The Plan class corresponding to the <i>aggregate</i>
   * relational algebra operator.
@@ -12,8 +14,8 @@ import java.util.Iterator;
 public class AggregatePlan implements Plan {
    private Plan p;
    private Schema schema = new Schema();
-   private Collection<String> fieldlist;
-   private Collection<String> aggfns;
+   private Map<String,String> schemaFields;
+   private Map<String,String> schemaAggs;
    
    /**
     * Creates a new aggregate node in the query tree,
@@ -25,14 +27,19 @@ public class AggregatePlan implements Plan {
     */
     public AggregatePlan(Plan p, Collection<String> fieldlist, Collection<String> aggfns) {
       this.p = p;
+      this.schemaFields = new HashMap<>();
+      this.schemaAggs = new HashMap<>();
       Iterator<String> fieldlistIt, aggfnsIt;
       fieldlistIt = fieldlist.iterator();
       aggfnsIt = aggfns.iterator();
       while(fieldlistIt.hasNext() && aggfnsIt.hasNext()) {
-         schema.addIntField(aggfnsIt.next() + "("+fieldlistIt.next()+")");
+        String field = fieldlistIt.next();
+        String agg = aggfnsIt.next();
+        String schemaField = agg + "("+field+")";
+         schema.addIntField(schemaField);
+         schemaFields.put(schemaField, field);
+         schemaAggs.put(schemaField, agg);
       }
-      this.fieldlist = fieldlist;
-      this.aggfns = aggfns;
    }
 
    /**
@@ -41,7 +48,7 @@ public class AggregatePlan implements Plan {
     */
    public Scan open() {
       Scan s = p.open();
-      return new AggregateScan(s, schema.fields(), fieldlist, aggfns);
+      return new AggregateScan(s, schemaFields, schemaAggs);
    }
 
    /**

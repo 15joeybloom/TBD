@@ -11,10 +11,9 @@ import java.util.*;
  */
 public class AggregateScan implements Scan {
     private Scan s;
-    private Collection<String> schemaFieldList;
-    private Collection<String> fieldlist;
-    private Collection<String> aggfns;
-    private List<Integer> accumulators, counts;
+    private Map<String,String> schemaFields;
+    private Map<String,String> schemaAggs;
+    private Map<String,Integer> accumulators, counts;
 
     private boolean called;
 
@@ -25,26 +24,25 @@ public class AggregateScan implements Scan {
      * @param fieldlist the list of field names
      * @param aggfns the aggregation functions list
      */
-    public AggregateScan(Scan s, Collection<String> schemaFieldList, Collection<String> fieldlist, Collection<String> aggfns) {
+    public AggregateScan(Scan s, Map<String,String> schemaFields, Map<String,String> schemaAggs) {
         this.s = s;
-        this.schemaFieldList = schemaFieldList;
-        this.fieldlist = fieldlist;
-        this.aggfns = aggfns;
-        this.accumulators = new ArrayList<>(Collections.nCopies(fieldlist.size(), 0));
-        this.counts = new ArrayList<>(Collections.nCopies(fieldlist.size(), 0));
+        this.schemaFields = schemaFields;
+        this.schemaAggs = schemaAggs;
+        this.accumulators = new HashMap<>();
+        this.counts = new HashMap<>();
         this.called = false;
 
-        Iterator<String> aggfnIt = aggfns.iterator();
-        int index = 0;
-        while(aggfnIt.hasNext()) {
-            String aggfn = aggfnIt.next();
-            if(aggfn.equals("min")) {
-                accumulators.set(index, Integer.MAX_VALUE);
+        for(Map.Entry<String, String> entry : this.schemaAggs.entrySet()) {
+            if(entry.getValue().equals("min")) {
+                accumulators.put(entry.getKey(), Integer.MAX_VALUE);
             }
-            else if(aggfn.equals("max")) {
-                accumulators.set(index, Integer.MIN_VALUE);
+            else if(entry.getValue().equals("max")) {
+                accumulators.put(entry.getKey(), Integer.MIN_VALUE);
             }
-            index++;
+            else {
+                accumulators.put(entry.getKey(), 0);
+            }
+            counts.put(entry.getKey(), 0);
         }
     }
 
@@ -66,20 +64,11 @@ public class AggregateScan implements Scan {
         this.called = true;
 
         while(s.next()) {
-            Iterator<String> fldnameIt, aggfnIt;
-            fldnameIt = fieldlist.iterator();
-            aggfnIt = aggfns.iterator();
-            ListIterator<Integer> accumulatorsIt, countsIt;
-            accumulatorsIt = accumulators.listIterator();
-            countsIt = counts.listIterator();
-
-            while(fldnameIt.hasNext() && aggfnIt.hasNext()
-                && accumulatorsIt.hasNext() && countsIt.hasNext()) {
-
-                String fldname = fldnameIt.next();
-                String aggfn = aggfnIt.next();
-                int accumulator = accumulatorsIt.next();
-                int count = countsIt.next();
+            for(String field : schemaFields.keySet()) {
+                String fldname = schemaFields.get(field);
+                String aggfn = schemaAggs.get(field);
+                int accumulator = accumulators.get(field);
+                int count = counts.get(field);
 
                 int value = s.getInt(fldname);
                 if(aggfn.equals("avg") || aggfn.equals("sum")) {
@@ -100,8 +89,8 @@ public class AggregateScan implements Scan {
                 else { //unrecognized agg function
                     throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
                 }
-                accumulatorsIt.set(accumulator);
-                countsIt.set(count);
+                accumulators.put(field, accumulator);
+                counts.put(field, count);
             }
         }
 
@@ -126,33 +115,23 @@ public class AggregateScan implements Scan {
      * returns.
      */
     public int getInt(String fldname) {
-        Iterator<String> fieldIt, aggfnIt;
-        fieldIt = schemaFieldList.iterator();
-        aggfnIt = aggfns.iterator();
-        ListIterator<Integer> accumulatorsIt, countsIt;
-        accumulatorsIt = accumulators.listIterator();
-        countsIt = counts.listIterator();
-
-        while(fieldIt.hasNext() && aggfnIt.hasNext()
-            && accumulatorsIt.hasNext() && countsIt.hasNext()) {
-
-            String field = fieldIt.next();
-            String aggfn = aggfnIt.next();
-            int accumulator = accumulatorsIt.next();
-            int count = countsIt.next();
-
-            if(fldname.equals(field)) {
-                if(aggfn.equals("avg"))
-                    return accumulator / count;
-                else if(aggfn.equals("sum") || aggfn.equals("min") || aggfn.equals("max"))
-                    return accumulator;
-                else if(aggfn.equals("count"))
-                    return count;
-                else //should be literally impossible to get here
-                    throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
-            }
+        String target = schemaFields.get(fldname);
+        if(target == null) {
+            throw new RuntimeException("field " + fldname + " not found.");
         }
-        throw new RuntimeException("field " + fldname + " not found.");
+
+        String aggfn = schemaAggs.get(fldname);
+        int accumulator = accumulators.get(fldname);
+        int count = counts.get(fldname);
+
+        if(aggfn.equals("avg"))
+            return accumulator / count;
+        else if(aggfn.equals("sum") || aggfn.equals("min") || aggfn.equals("max"))
+            return accumulator;
+        else if(aggfn.equals("count"))
+            return count;
+        else //should be literally impossible to get here
+            throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
     }
 
 /*
@@ -205,6 +184,6 @@ public class AggregateScan implements Scan {
      * @see simpledb.query.Scan#hasField(java.lang.String)
      */
     public boolean hasField(String fldname) {
-        return schemaFieldList.contains(fldname);
+        return schemaFields.containsKey(fldname);
     }
 }
