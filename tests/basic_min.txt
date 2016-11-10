@@ -1,1 +1,2 @@
 select min(majorid) from student
+exit

@@ -1,1 +1,2 @@
 select majorid from student
+exit
