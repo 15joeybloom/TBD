@@ -1,0 +1,12 @@
+
+SQL> 
+select count(GradYear) from student group by GradYear;
+count(GradYear)
+------
+    2
+    1
+    4
+    2
+
+SQL> 
+exit

@@ -1,0 +1,2 @@
+select count(GradYear) from student group by GradYear
+exit

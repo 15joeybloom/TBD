@@ -1,0 +1,11 @@
+
+SQL> 
+select DName, avg(Grade) from student, enroll, dept where SId = StudentId and MajorId = DId group by DName
+   DName   avg(Grade)
+--------------
+ compsci    69
+   drama    83
+    math    88
+
+SQL> 
+exit
