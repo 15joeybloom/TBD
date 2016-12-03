@@ -65,12 +65,22 @@ public class Parser {
          lex.eatKeyword("where");
          pred = predicate();
       }
+
+      // Handle Group By
+      Collection<String> groupByFields = new ArrayList<String>();
+      if (lex.matchKeyword("group"))
+      {
+         lex.eatKeyword("group");
+         lex.eatKeyword("by");
+         groupByFields = tableList(); // Gets list of comma seperated values, should work
+      }
+
       //if aggs contains only nulls, then this is a basic
       //query, not an aggregation query
       if(Collections.singleton(null).containsAll(aggs))
           return new QueryData(fields, tables, pred);
         else
-            return new AggQueryData(aggs, fields, tables, pred);
+            return new AggQueryData(aggs, groupByFields, fields, tables, pred);
    }
    
    private List<Collection<String> > selectList() {
