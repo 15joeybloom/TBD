@@ -1,4 +1,2 @@
-select DName, avg(Grade) from student, enroll, dept
-where SId = StudentId and MajorId = DId
-group by DName
+select DName, avg(Grade) from student, enroll, dept where SId = StudentId and MajorId = DId group by DName
 exit
