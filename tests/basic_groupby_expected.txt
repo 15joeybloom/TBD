@@ -1,12 +1,12 @@
 
 SQL> 
-select count(GradYear) from student group by GradYear;
-count(GradYear)
+select count(GradYear) from student group by GradYear
+count(gradyear)
 ------
-    2
-    1
-    4
-    2
+     4
+     2
+     1
+     2
 
 SQL> 
 exit
