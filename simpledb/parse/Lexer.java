@@ -226,7 +226,7 @@ public class Lexer {
       keywords = Arrays.asList("select", "from", "where", "and",
                                "insert", "into", "values", "delete", "update", "set", 
                                "create", "table", "int", "varchar", "view", "as", "index", "on",
-                                "group", "by");
+                                "group", "by", "having");
    }
    private void initAggFunctions() {
         aggFunctions = Arrays.asList("max", "min", "sum", "avg", "count", "range");

@@ -41,12 +41,45 @@ public class Parser {
       Expression rhs = expression();
       return new Term(lhs, rhs);
    }
+
+   public Term havingterm() {
+        Expression lhs, rhs;
+        if(lex.matchAggFunction()) {
+            String agg = lex.eatAggFunction();
+            lex.eatDelim('(');
+            String field = lex.eatId();
+            lex.eatDelim(')');
+            lhs = new FieldNameExpression(agg + "(" + field + ")");
+        }
+        else
+            lhs = expression();
+        lex.eatDelim('=');
+        if(lex.matchAggFunction()) {
+            String agg = lex.eatAggFunction();
+            lex.eatDelim('(');
+            String field = lex.eatId();
+            lex.eatDelim(')');
+            rhs = new FieldNameExpression(agg + "(" + field + ")");
+        }
+        else
+            rhs = expression();
+        return new Term(lhs, rhs);
+   }
    
    public Predicate predicate() {
       Predicate pred = new Predicate(term());
       if (lex.matchKeyword("and")) {
          lex.eatKeyword("and");
          pred.conjoinWith(predicate());
+      }
+      return pred;
+   }
+
+   public Predicate having() {
+      Predicate pred = new Predicate(havingterm());
+      if (lex.matchKeyword("and")) {
+         lex.eatKeyword("and");
+         pred.conjoinWith(having());
       }
       return pred;
    }
@@ -68,11 +101,17 @@ public class Parser {
 
       // Handle Group By
       Collection<String> groupByFields = new ArrayList<String>();
+      Predicate having = new Predicate();
       if (lex.matchKeyword("group"))
       {
          lex.eatKeyword("group");
          lex.eatKeyword("by");
          groupByFields = tableList(); // Gets list of comma seperated values, should work
+
+         if(lex.matchKeyword("having")) {
+            lex.eatKeyword("having");
+            having = having();
+         }
       }
 
       //if aggs contains only nulls, then this is a basic
@@ -80,7 +119,7 @@ public class Parser {
       if(Collections.singleton(null).containsAll(aggs))
           return new QueryData(fields, tables, pred);
         else
-            return new AggQueryData(aggs, groupByFields, fields, tables, pred);
+            return new AggQueryData(aggs, groupByFields, having, fields, tables, pred);
    }
    
    private List<Collection<String> > selectList() {
