@@ -48,6 +48,9 @@ public class AggQueryPlanner extends BasicQueryPlanner {
       */
         //Step 5: Perform the aggregation
         p = new AggregatePlan(p, data.fields(), data.aggFunctions(), data.groupByFields());
+
+        //Step 6: Add a selection plan for the having predicate
+        p = new SelectPlan(p, data.having());
         return p;
    }
 }
