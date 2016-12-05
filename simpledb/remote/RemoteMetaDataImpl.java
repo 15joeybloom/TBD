@@ -74,7 +74,7 @@ public class RemoteMetaDataImpl extends UnicastRemoteObject implements RemoteMet
       int fldtype = sch.type(fldname);
       int fldlength = sch.length(fldname);
       if (fldtype == INTEGER)
-         return 6;  // accommodate 6-digit integers
+         return Math.max(6,fldname.length() + 1);  // accommodate 6-digit integers
       else
          return fldlength;
    }
