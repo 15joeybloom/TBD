@@ -1,2 +1,0 @@
-select max(majorid) from student
-exit

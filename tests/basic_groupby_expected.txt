@@ -1,12 +1,6 @@
-
-SQL> 
-select count(GradYear) from student group by GradYear
-count(gradyear)
-------
-     4
-     2
-     1
-     2
-
-SQL> 
-exit
+ count(gradyear)
+----------------
+               4
+               2
+               1
+               23

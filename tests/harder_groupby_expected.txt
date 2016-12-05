@@ -1,10 +1,5 @@
-
-SQL> 
-select DName, avg(Grade) from student, enroll, dept where SId = StudentId and MajorId = DId group by DName
-avg(grade)   dname
---------------
-    69 compsci
-    88    math
-
-SQL> 
-exit
+ avg(grade)   dname
+-------------------
+         69 compsci
+         88    math
+         85   drama

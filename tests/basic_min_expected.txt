@@ -1,9 +1,3 @@
-
-SQL> 
-select min(majorid) from student
-min(majorid)
-------
-    10
-
-SQL> 
-exit
+ min(sid)
+---------
+        1

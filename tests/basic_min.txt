@@ -1,2 +1,1 @@
-select min(majorid) from student
-exit
+select min(sid) from student
