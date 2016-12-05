@@ -56,10 +56,16 @@ public class AggregateScan implements Scan {
             else if(entry.getValue().equals("max")) {
                 accumulatorInitialValues.put(entry.getKey(), Integer.MIN_VALUE);
             }
+	    else if(entry.getValue().equals("range")) {
+		accumulatorInitialValues.put(entry.getKey(), Integer.MAX_VALUE);
+	    }
             else {
                 accumulatorInitialValues.put(entry.getKey(), 0);
             }
             countInitialValues.put(entry.getKey(), 0);
+	    if(entry.getValue().equals("range")) { // a little sloppy
+		countInitialValues.put(entry.getKey(), Integer.MIN_VALUE);
+	    }
         }
 
         row = -1;
@@ -133,6 +139,14 @@ public class AggregateScan implements Scan {
                         if(value < accumulator)
                             accumulator = value;
                     }
+		    else if(aggfn.equals("range")) {
+			if(value > count) {
+			    count = value;
+			}
+			if(value < accumulator) {
+			    accumulator = value;
+			}
+		    }
                     else { //unrecognized agg function
                         throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
                     }
@@ -188,6 +202,8 @@ public class AggregateScan implements Scan {
             return accumulator;
         else if(aggfn.equals("count"))
             return count;
+	else if(aggfn.equals("range"))
+	    return count - accumulator;
         else //should be literally impossible to get here
             throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
     }

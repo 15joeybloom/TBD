@@ -229,6 +229,6 @@ public class Lexer {
                                 "group", "by");
    }
    private void initAggFunctions() {
-        aggFunctions = Arrays.asList("max", "min", "sum", "avg", "count");
+        aggFunctions = Arrays.asList("max", "min", "sum", "avg", "count", "range");
    }
 }
