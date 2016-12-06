@@ -57,10 +57,15 @@ The difference in query execution for this phase is that an aggregation query ca
 
 #### Phase 3 - Having
 
-
+//implementing having was just extending the parser slightly and putting a selectscan after the aggqueryplan's projection
 
 ### Challenges we ran into
 
+The first challenge we faced was understanding the structure of SimpleDB. In order to determined where we needed to make changes, we first had to figure out where the query processing work was done. The earliest work was tracing function calls and finding where we could access and modify query data.
+
+The next challenge was fitting the aggregation model into the existing SimpleDB query execution process. Unlike select, project, and product operations, aggregation functions must iterate through the entire relation before they have a result to return. We tackled this by redesigning the next() method in our AggregateQueryScan class to only be called one time and to process the entire sub-relation at once.
+
+As we moved onto implementing group by we had to start making larger and larger changes to the base code, which took trial and error. 
 ### Lessons Learned
 1.
 2.
