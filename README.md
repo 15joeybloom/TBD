@@ -98,7 +98,7 @@ The first challenge we faced was understanding the structure of SimpleDB. In ord
 
 The next challenge was fitting the aggregation model into the existing SimpleDB query execution process. Unlike select, project, and product operations, aggregation functions must iterate through the entire relation before they have a result to return. We tackled this by redesigning the next() method in our AggregateQueryScan class to only be called one time and to process the entire sub-relation at once.
 
-As we moved onto implementing group by we had to start making larger and larger changes to the base code, which took trial and error. Fortunately by this point we had considerabl experience working with SimpleDB and trying out different solution implementations was simply a matter of time investment.
+As we moved onto implementing group by we had to start making larger and larger changes to the base code, which took trial and error. Fortunately by this point we had considerable experience working with SimpleDB and trying out different solution implementations was simply a matter of time investment.
 
 ### Lessons Learned
 
