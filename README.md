@@ -26,6 +26,39 @@ This selects all of the graduating classes with two students, and gives the year
 
 ### How We Did It
 
+#### Phase 1 - Aggregation
+Our first goal was to be able to aggregate data without groups. A query that we could evaluate during this phase might have looked like:
+
+```sql
+Select avg(grade), min(grade), max(grade), count(eid)
+From Enroll
+Where studentid = 1
+```
+This calculates student number 1's grade average, their best and worst grade, and the number of grades they have (the number of classes they are enrolled in). Note that at this stage, every field in the Select clause needed to have an aggregation function.
+
+Parsing a query in this phase involved, first and foremost, modifying the Parser to be able to recognize the difference between a regular query and an aggregation query. We modified the Lexer to recognize the different aggregation functions. The Parser then stores the field name and the aggregation function associated with it. We extended the QueryData class for this purpose, creating our AggQueryData class. 
+
+For the query execution, we created two classes - AggregatePlan and AggregateScan. A phase 1 query is guaranteed to have only 1 result tuple, so we begin execution by initializing two integer variables for each field in the result - the accumulator and the count. As we read tuples from the child scan of the AggregateScan, the accumulator for a field stores either the sum of the values, or the minimum/maximum value seen so far, depending on the aggregation function associated with the field. The count variable for a field stores the number of values seen so far, used for the count and avg aggregation functions. After all tuples have been read from the child scan, the AggregateScan reports the summary data.
+
+#### Phase 2 - Group By
+
+Our next goal was to be able to aggregate data with groups. A query that we could evaluate during this phase might have looked like:
+
+```sql
+Select studentid, avg(grade), min(grade), max(grade), count(eid)
+From Enroll
+Group By studentid
+```
+This calculates the grade average, best and worst grade, and number of grades for __each student__
+
+Parsing a query in this phase involved looking for an optional Group By clause after looking for the optional Where clause. Then, if the keywords "Group By" are in the query, we parse the comma-separated list of Group By fields and store the list of fields in an AggQueryData object.
+
+The difference in query execution for this phase is that an aggregation query can now return more than one result tuple. Now we need a list that stores the accumulators and counts for each result tuple. When we read a result tuple from the child scan, we need to check the values of the Group By fields of this tuple to see if we already have accumulators and counts for the group to which this tuple belongs. If the variables exist, then we modify them according to the values of the aggregated fields in the child tuple, otherwise we initialize new accumulators and counts for this new group, creating a new result tuple. After we read the whole child scan, we can then start returning result tuples.
+
+#### Phase 3 - Having
+
+
+
 ### Challenges we ran into
 
 ### Lessons Learned
