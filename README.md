@@ -57,7 +57,25 @@ The difference in query execution for this phase is that an aggregation query ca
 
 #### Phase 3 - Having
 
-//implementing having was just extending the parser slightly and putting a selectscan after the aggqueryplan's projection
+The final phase of our project was to be able to filter groups based on aggregated values by implementing the Having clause. A phase 3 query might look like:
+
+```sql
+Select studentid, avg(grade), min(grade), max(grade), count(eid)
+From Enroll
+Group By studentid
+Having max(grade) = 100
+```
+
+This calculates the grade average, best and worst grade, and number of grades for __each student__ who has gotten a __perfect score (100)__ in a class.
+
+Parsing a query in phase 3 involed looking for an optional Having clause if the Parser found a Group By clause. Then, if the "Having" keyword is found after the comma-separated list of Group By fields, the Parser parses a Predicate from the query just like it does for the Where clause. This Predicate is stored in an AggQueryData object.
+
+Query execution for this phase involved modifying AggQueryPlanner. After some thought, we realized that Having could be implemented by a SelectPlan, to be placed directly above the AggregatePlan in the query execution tree. So the query visualization for our example phase 3 query might look like:
+
+1. TablePlan on Enroll
+2. SelectPlan on Node 1
+3. AggregatePlan on Node 2
+4. SelectPlan on Node 3
 
 ### Challenges we ran into
 
