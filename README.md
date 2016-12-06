@@ -96,7 +96,15 @@ Query execution for this phase involved modifying AggQueryPlanner. After some th
 
 After we implemented aggregation, we ended up with long column names in result sets, like "count(studentid)". These were causing our results to display poorly, and the column headers would be offset from the data. We found the code in SimpleDB that handles printing the result set and improved its ability to handle longer field names.
 
-Once we had a solid understanding of how aggregation worked and how to manipulate aggregation queries, we decided to experiment a bit with expanding aggregation options beyond the SQL standard. After some fiddling, we settled on a range(fieldname) function that would determine the difference between the maximum and minimum values in a column.
+After implementing count, sum, avg, min, and max, we realized it would be pretty easy to implement other aggregation functions. We decided to experiment a bit with expanding aggregation options beyond the SQL standard. After some fiddling, we settled on a range(fieldname) function that would determine the difference between the maximum and minimum values in a column. Here's an example query:
+
+```sql
+Select sname, range(grade)
+From Student, Enroll
+Where sid = studentid
+Group By sname
+```
+This gets the range of grades for each student - the difference between the student's best and worst grades.
 
 ### Challenges we ran into
 
@@ -111,17 +119,3 @@ As we moved onto implementing group by we had to start making larger and larger 
 1. Documentation in large code bases is invaluable. If it weren't for the clear documentation and structural models for the SimpleDB code and architecture, it would have taken ages to grasp how queries, planners, scans and plans all work together to get the data the user wants.
 2. Don't go overboard with version control. Early on in our project development we tried to be very conservative and precise with our version control to minimize the complexity of the repo. This ended up being extremely cumbersome and caused some issues with failed commits and eventually needs for messy merges. We simplified our repo control and communicated what files we were making changes to to improve workflow.
 3. Don't be afraid to make changes. Early on we tried to change as little code as possible in order to prevent significant bugs on our end. This ended up forcing us into a small solution space since we weren't effectively expanding upon the utility of the provided code. Once we became more confident and started making larger changes, we were able to more easily realize the functionality needed for comprehensive aggregation.
-
-### Testing Our Project
-
-For editing it, use this [cheat sheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#headers)
-
-Here's the cool algorithm we used!
-
-```java
-int coolAlgorithm(Table t, Scan s, Query q)
-{
-  return 4;
-}
-```
-
