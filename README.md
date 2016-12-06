@@ -6,9 +6,9 @@ We implemented aggregate functions, Group By, and Having into the SimpleDB archi
 
 Execute the script compile.sh to compile the project. This will compile the SimpleDB core and also the files in the studentClient directory, which are some example queries provided by the creator of SimpleDB. 
 
-Execute the script start_student.sh to start the SimpleDB server and create a small set of tables for testing. Then you can execute run_tests.sh to query the database using several example queries of our own creation to demonstrate the database's new capabilities.
+Execute the script [start_student.sh](/start_student.sh) to start the SimpleDB server and create a small set of tables for testing. Then you can execute [run_tests.sh](/run_tests.sh) to query the database using several example queries of our own creation to demonstrate the database's new capabilities.
 
-Alternatively, execute start_large.sh to start the SimpleDB server and create the same set of tables but with a relatively large amount of data (100s of rows) in the Student and Enroll tables. Then you can execute largetest1.sh or largetest2.sh to see the efficiency of our implementation.
+Alternatively, execute [start_large.sh](/start_large.sh) to start the SimpleDB server and create the same set of tables but with a relatively large amount of data (100s of rows) in the Student and Enroll tables. Then you can execute [largetest1.sh](/largetest1.sh) or [largetest2.sh](/largetest2.sh) to see the efficiency of our implementation.
 
 ### What we set out to do
 
