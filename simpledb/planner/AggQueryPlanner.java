@@ -11,14 +11,15 @@ import java.util.*;
  * No group by. Each field must have an associated aggregation function.
  * @author Joey Bloom
  */
-public class AggQueryPlanner extends BasicQueryPlanner {
+public class AggQueryPlanner implements QueryPlanner {
    
    /**
     * Creates a query plan as follows.  It first takes
     * the product of all tables and views; it then selects on the predicate;
     * and finally it projects on the field list. 
     */
-   public Plan createPlan(AggQueryData data, Transaction tx) {
+   public Plan createPlan(QueryData data, Transaction tx) {
+        AggQueryData aggdata = (AggQueryData)data;
         //Plan p = super.createPlan(data, tx);
       //Step 1: Create a plan for each mentioned table or view
       List<Plan> plans = new ArrayList<Plan>();
@@ -47,10 +48,10 @@ public class AggQueryPlanner extends BasicQueryPlanner {
       return p;
       */
         //Step 5: Perform the aggregation
-        p = new AggregatePlan(p, data.fields(), data.aggFunctions(), data.groupByFields());
+        p = new AggregatePlan(p, data.fields(), aggdata.aggFunctions(), aggdata.groupByFields());
 
         //Step 6: Add a selection plan for the having predicate
-        p = new SelectPlan(p, data.having());
+        p = new SelectPlan(p, aggdata.having());
         return p;
    }
 }
