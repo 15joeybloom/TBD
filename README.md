@@ -1,4 +1,4 @@
-# Our Project
+# Our Project Report
 
 We implemented aggregate functions, Group By, and Having into the SimpleDB architecture. SimpleDB, as it is, does not give the user any overview information about their data. They can select and update individual rows, but there's no way to get summary information about a large dataset. Our project works toward solving that problem.
 
