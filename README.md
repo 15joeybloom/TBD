@@ -40,6 +40,13 @@ Parsing a query in this phase involved, first and foremost, modifying the Parser
 
 For the query execution, we created two classes - AggregatePlan and AggregateScan. A phase 1 query is guaranteed to have only 1 result tuple, so we begin execution by initializing two integer variables for each field in the result - the accumulator and the count. As we read tuples from the child scan of the AggregateScan, the accumulator for a field stores either the sum of the values, or the minimum/maximum value seen so far, depending on the aggregation function associated with the field. The count variable for a field stores the number of values seen so far, used for the count and avg aggregation functions. After all tuples have been read from the child scan, the AggregateScan reports the summary data.
 
+We also created a class [AggQueryPlanner](/simpledb/planner/AggQueryPlanner.java). This class parallels [BasicQueryPlanner](/simpledb/planner/BasicQueryPlanner.java), they both implement the Planner interface. For phase 1, we chose to make AggQueryPlanner extend BasicQueryPlanner. We could then take advantage of that inheritance relationship within AggQueryPlanner.createPlan by calling super and then adding an AggregatePlan to the top of the execution tree. Here's what a phase 1 execution tree might have looked like:
+
+1. TablePlan on Enroll
+2. SelectPlan on Node 1
+3. ProjectPlan on Node 2
+4. AggregatePlan on Node 3
+
 #### Phase 2 - Group By
 
 Our next goal was to be able to aggregate data with groups. A query that we could evaluate during this phase might have looked like:
@@ -54,6 +61,12 @@ This calculates the grade average, best and worst grade, and number of grades fo
 Parsing a query in this phase involved looking for an optional Group By clause after looking for the optional Where clause. Then, if the keywords "Group By" are in the query, we parse the comma-separated list of Group By fields and store the list of fields in an AggQueryData object.
 
 The difference in query execution for this phase is that an aggregation query can now return more than one result tuple. Now we need a list that stores the accumulators and counts for each result tuple. When we read a result tuple from the child scan, we need to check the values of the Group By fields of this tuple to see if we already have accumulators and counts for the group to which this tuple belongs. If the variables exist, then we modify them according to the values of the aggregated fields in the child tuple, otherwise we initialize new accumulators and counts for this new group, creating a new result tuple. After we read the whole child scan, we can then start returning result tuples.
+
+Phase 2 suggested removing the inheritance relationship between AggQueryPlanner and BasicQueryPlanner; the relationship was no longer useful. Both classes now implement the Planner interface directly. The reason for this is that an aggregate query with a group by should not include a ProjectPlan. If we project to only include the fields in the select clause, we might exclude a field that is in the group by clause and is necessary for proper query execution. So therefore, AggQueryPlanner needed to build a Plan that did not include a ProjectPlan. Here's what the simplest phase 2 query execution tree might look like:
+
+1. TablePlan on Enroll
+2. SelectPlan on Node 1
+3. AggregatePlan on Node 2
 
 #### Phase 3 - Having
 
