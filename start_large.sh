@@ -1,4 +1,3 @@
-#! /usr/bin/bash
 fuser -k 1099/tcp
 
 rm -rf ~/studentdb
