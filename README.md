@@ -49,8 +49,6 @@ We also created a class [AggQueryPlanner](/simpledb/planner/AggQueryPlanner.java
 3. ProjectPlan on Node 2
 4. AggregatePlan on Node 3
 
-Once we had aggregation up and running, we decided to experiment a bit with expanding aggregation options beyond the SQL standard. After some fiddling, we settled on a range(fieldname) function that would determine the difference between the maximum and minimum values in a column.
-
 #### Phase 2 - Group By
 
 Our next goal was to be able to aggregate data with groups. A query that we could evaluate during this phase might have looked like:
@@ -97,6 +95,8 @@ Query execution for this phase involved modifying AggQueryPlanner. After some th
 ### Other features
 
 After we implemented aggregation, we ended up with long column names in result sets, like "count(studentid)". These were causing our results to display poorly, and the column headers would be offset from the data. We found the code in SimpleDB that handles printing the result set and improved its ability to handle longer field names.
+
+Once we had a solid understanding of how aggregation worked and how to manipulate aggregation queries, we decided to experiment a bit with expanding aggregation options beyond the SQL standard. After some fiddling, we settled on a range(fieldname) function that would determine the difference between the maximum and minimum values in a column.
 
 ### Challenges we ran into
 
