@@ -12,7 +12,15 @@ Alternatively, execute [start_large.sh](/start_large.sh) to start the SimpleDB s
 
 ### What we set out to do
 
-Here's our people writing about what we wanted to do. Here's some more stuff.
+Our goals were to implement several aggregation operators, the Group By clause, and the Having clause. We wanted to be able to execute a query like the following:
+
+```sql
+Select gradyear, count(sid)
+From Student
+Group By gradyear
+Having count(sid) = 2
+```
+This selects all of the graduating classes with two students, and gives the year and number of students.
 
 ### What we accomplished
 
