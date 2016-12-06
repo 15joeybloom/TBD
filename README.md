@@ -26,8 +26,6 @@ Having count(sid) = 2
 ```
 This selects all of the graduating classes with two students, and gives the year and number of students.
 
-### What we accomplished
-
 ### How We Did It
 
 #### Phase 1 - Aggregation
@@ -93,6 +91,10 @@ Query execution for this phase involved modifying AggQueryPlanner. After some th
 2. SelectPlan on Node 1
 3. AggregatePlan on Node 2
 4. SelectPlan on Node 3
+
+### Other features
+
+After we implemented aggregation, we ended up with long column names in result sets, like "count(studentid)". These were causing our results to display poorly, and the column headers would be offset from the data. We found the code in SimpleDB that handles printing the result set and improved its ability to handle longer field names.
 
 ### Challenges we ran into
 
