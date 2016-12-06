@@ -49,6 +49,8 @@ We also created a class [AggQueryPlanner](/simpledb/planner/AggQueryPlanner.java
 3. ProjectPlan on Node 2
 4. AggregatePlan on Node 3
 
+Once we had aggregation up and running, we decided to experiment a bit with expanding aggregation options. After some fiddling, we settled on a range(fieldname) function that would determine the difference between the maximum and minimum values in a column.
+
 #### Phase 2 - Group By
 
 Our next goal was to be able to aggregate data with groups. A query that we could evaluate during this phase might have looked like:
