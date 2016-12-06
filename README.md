@@ -83,11 +83,13 @@ The first challenge we faced was understanding the structure of SimpleDB. In ord
 
 The next challenge was fitting the aggregation model into the existing SimpleDB query execution process. Unlike select, project, and product operations, aggregation functions must iterate through the entire relation before they have a result to return. We tackled this by redesigning the next() method in our AggregateQueryScan class to only be called one time and to process the entire sub-relation at once.
 
-As we moved onto implementing group by we had to start making larger and larger changes to the base code, which took trial and error. 
+As we moved onto implementing group by we had to start making larger and larger changes to the base code, which took trial and error. Fortunately by this point we had considerabl experience working with SimpleDB and trying out different solution implementations was simply a matter of time investment.
+
 ### Lessons Learned
-1.
-2.
-3.
+
+1. Documentation in large code bases is invaluable. If it weren't for the clear documentation and structural models for the SimpleDB code and architecture, it would have taken ages to grasp how queries, planners, scans and plans all work together to get the data the user wants.
+2. Don't go overboard with version control. Early on in our project development we tried to be very conservative and precise with our version control to minimize the complexity of the repo. This ended up being extremely cumbersome and caused some issues with failed commits and eventually needs for messy merges. We simplified our repo control and communicated what files we were making changes to to improve workflow.
+3. Don't be afraid to make changes. Early on we tried to change as little code as possible in order to prevent significant bugs on our end. This ended up forcing us into a small solution space since we weren't effectively expanding upon the utility of the provided code. Once we became more confident and started making larger changes, we were able to more easily realize the functionality needed for comprehensive aggregation.
 
 ### Testing Our Project
 
