@@ -83,7 +83,14 @@ public class CreateStudentDB {
 								   "(2, 2, 43, 103)",
 								   "(3, 4, 33, 80 )",
 								   "(4, 4, 53, 69 )",
-								   "(5, 6, 53, 99 )"};
+								   "(5, 6, 53, 99 )",
+								   "(6, 5, 33, 91 )",
+								   "(10, 7, 43, 72 )",
+								   "(9, 7, 13, 65 )",
+								   "(11, 7, 53, 99 )",
+								   "(8, 5, 13, 100 )",
+								   "(7, 5, 43, 78 )",
+								   "(6, 5, 33, 91) "};
 			for (int i=0; i<enrollvals.length; i++)
 				stmt.executeUpdate(s + enrollvals[i]);
 			System.out.println("ENROLL records inserted.");

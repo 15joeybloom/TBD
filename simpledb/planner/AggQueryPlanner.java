@@ -19,8 +19,7 @@ public class AggQueryPlanner extends BasicQueryPlanner {
     * and finally it projects on the field list. 
     */
    public Plan createPlan(AggQueryData data, Transaction tx) {
-        Plan p = super.createPlan(data, tx);
-        /*
+        //Plan p = super.createPlan(data, tx);
       //Step 1: Create a plan for each mentioned table or view
       List<Plan> plans = new ArrayList<Plan>();
       for (String tblname : data.tables()) {
@@ -39,12 +38,19 @@ public class AggQueryPlanner extends BasicQueryPlanner {
       //Step 3: Add a selection plan for the predicate
       p = new SelectPlan(p, data.pred());
       
+      //don't project! There could be fields in the group by clause
+      //that aren't in the select clause. projecting would lose
+      //those fields. Let the aggregateplan take care of projection.
+        /*
       //Step 4: Project on the field names
       p = new ProjectPlan(p, data.fields());
       return p;
       */
         //Step 5: Perform the aggregation
-        p = new AggregatePlan(p, data.fields(), data.aggFunctions());
+        p = new AggregatePlan(p, data.fields(), data.aggFunctions(), data.groupByFields());
+
+        //Step 6: Add a selection plan for the having predicate
+        p = new SelectPlan(p, data.having());
         return p;
    }
 }

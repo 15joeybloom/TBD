@@ -13,7 +13,13 @@ public class AggregateScan implements Scan {
     private Scan s;
     private Map<String,String> schemaFields;
     private Map<String,String> schemaAggs;
-    private Map<String,Integer> accumulators, counts;
+    private List<String> groupByFields;
+    private List<List<Constant>> aggKeys;
+    private List<Map<String,Integer>> accumulators, counts;
+    private Map<String, Integer> accumulatorInitialValues, countInitialValues;
+
+    //the current row for next()
+    private int row;
 
     private boolean called;
 
@@ -24,31 +30,64 @@ public class AggregateScan implements Scan {
      * @param fieldlist the list of field names
      * @param aggfns the aggregation functions list
      */
-    public AggregateScan(Scan s, Map<String,String> schemaFields, Map<String,String> schemaAggs) {
+    public AggregateScan(Scan s, Map<String,String> schemaFields, 
+        Map<String,String> schemaAggs, Collection<String> groupByFields) {
         this.s = s;
         this.schemaFields = schemaFields;
         this.schemaAggs = schemaAggs;
-        this.accumulators = new HashMap<>();
-        this.counts = new HashMap<>();
+        this.groupByFields = new ArrayList<>(groupByFields);
+        this.accumulators = new ArrayList<>();
+        this.counts = new ArrayList<>();
         this.called = false;
 
+        aggKeys = new ArrayList<>();
+
+        accumulatorInitialValues = new HashMap<>();
+        countInitialValues = new HashMap<>();
         for(Map.Entry<String, String> entry : this.schemaAggs.entrySet()) {
+            if(entry.getValue() == null) {
+                //if it's a regular, not aggregated field
+                //don't need an accumulator or count
+                continue;
+            }
             if(entry.getValue().equals("min")) {
-                accumulators.put(entry.getKey(), Integer.MAX_VALUE);
+                accumulatorInitialValues.put(entry.getKey(), Integer.MAX_VALUE);
             }
             else if(entry.getValue().equals("max")) {
-                accumulators.put(entry.getKey(), Integer.MIN_VALUE);
+                accumulatorInitialValues.put(entry.getKey(), Integer.MIN_VALUE);
             }
+	    else if(entry.getValue().equals("range")) {
+		accumulatorInitialValues.put(entry.getKey(), Integer.MAX_VALUE);
+	    }
             else {
-                accumulators.put(entry.getKey(), 0);
+                accumulatorInitialValues.put(entry.getKey(), 0);
             }
-            counts.put(entry.getKey(), 0);
+            countInitialValues.put(entry.getKey(), 0);
+	    if(entry.getValue().equals("range")) { // a little sloppy
+		countInitialValues.put(entry.getKey(), Integer.MIN_VALUE);
+	    }
         }
+
+        row = -1;
+        /*
+        System.out.println("groupByFields = " + groupByFields);
+        System.out.println("schemaFields = " + schemaFields);
+        System.out.println("schemaAggs = " + schemaAggs);
+
+        Constant c1 = new IntConstant(1);
+        Constant c2 = new IntConstant(1);
+        System.out.println("c1.equals(c2) == " + c1.equals(c2));
+        */
     }
 
     //Honestly not sure what this is doing.
     public void beforeFirst() {
         s.beforeFirst();
+        this.called = false;
+        aggKeys.clear();
+        accumulators.clear();
+        counts.clear();
+        row = -1;
     }
 
     /* Only allow next() to be called once. If it is
@@ -58,43 +97,67 @@ public class AggregateScan implements Scan {
      * only occur once.
      */
     public boolean next() {
-        if(this.called) {
-            return false;
-        }
-        this.called = true;
+        if(!this.called) {
+            //calculate
+            while(s.next()) {
+                List<Constant> key = new ArrayList<>();
+                for(String groupByField : groupByFields) {
+                    key.add(s.getVal(groupByField));
+                }
 
-        while(s.next()) {
-            for(String field : schemaFields.keySet()) {
-                String fldname = schemaFields.get(field);
-                String aggfn = schemaAggs.get(field);
-                int accumulator = accumulators.get(field);
-                int count = counts.get(field);
+                int keyIndex = aggKeys.indexOf(key);
+                if(keyIndex == -1) {
+                    keyIndex = aggKeys.size();
+                    aggKeys.add(key);
+                    accumulators.add(new HashMap<>(accumulatorInitialValues));
+                    counts.add(new HashMap<>(countInitialValues));
+                }
+                for(String field : accumulatorInitialValues.keySet()) {
+                    String fldname = schemaFields.get(field);
+                    String aggfn = schemaAggs.get(field);
+                    /*
+                    System.out.println("accumulators = " + accumulators);
+                    System.out.println("keyIndex = " + keyIndex);
+                    System.out.println("field = " + field);
+                    */
+                    int accumulator = accumulators.get(keyIndex).get(field);
+                    int count = counts.get(keyIndex).get(field);
 
-                int value = s.getInt(fldname);
-                if(aggfn.equals("avg") || aggfn.equals("sum")) {
-                    accumulator += value;
-                    count++;
+                    int value = s.getInt(fldname);
+                    if(aggfn.equals("avg") || aggfn.equals("sum")) {
+                        accumulator += value;
+                        count++;
+                    }
+                    else if(aggfn.equals("count")) {
+                        count++;
+                    }
+                    else if(aggfn.equals("max")) {
+                        if(value > accumulator)
+                            accumulator = value;
+                    }
+                    else if(aggfn.equals("min")) {
+                        if(value < accumulator)
+                            accumulator = value;
+                    }
+		    else if(aggfn.equals("range")) {
+			if(value > count) {
+			    count = value;
+			}
+			if(value < accumulator) {
+			    accumulator = value;
+			}
+		    }
+                    else { //unrecognized agg function
+                        throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
+                    }
+                    accumulators.get(keyIndex).put(field, accumulator);
+                    counts.get(keyIndex).put(field, count);
                 }
-                else if(aggfn.equals("count")) {
-                    count++;
-                }
-                else if(aggfn.equals("max")) {
-                    if(value > accumulator)
-                        accumulator = value;
-                }
-                else if(aggfn.equals("min")) {
-                    if(value < accumulator)
-                        accumulator = value;
-                }
-                else { //unrecognized agg function
-                    throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
-                }
-                accumulators.put(field, accumulator);
-                counts.put(field, count);
             }
         }
-
-        return true;
+        this.called = true;
+        row++;
+        return row < aggKeys.size();
     }
 
     //Close the child scan, propagates.
@@ -104,7 +167,12 @@ public class AggregateScan implements Scan {
 
     //Functions for getting values.
     public Constant getVal(String fldname) {
-        return s.getVal(fldname);
+        if(groupByFields.contains(fldname)) {
+            return aggKeys.get(row).get(groupByFields.indexOf(fldname));
+        }
+        else
+            //otherwise it's an aggregate field
+            return new IntConstant(getInt(fldname));
     }
 
     /* This method is distinctly different from those in
@@ -115,14 +183,18 @@ public class AggregateScan implements Scan {
      * returns.
      */
     public int getInt(String fldname) {
+        if(groupByFields.contains(fldname)) {
+            return (Integer)aggKeys.get(row).get(groupByFields.indexOf(fldname)).asJavaVal();
+        }
+
         String target = schemaFields.get(fldname);
         if(target == null) {
             throw new RuntimeException("field " + fldname + " not found.");
         }
 
         String aggfn = schemaAggs.get(fldname);
-        int accumulator = accumulators.get(fldname);
-        int count = counts.get(fldname);
+        int accumulator = accumulators.get(row).get(fldname);
+        int count = counts.get(row).get(fldname);
 
         if(aggfn.equals("avg"))
             return accumulator / count;
@@ -130,6 +202,8 @@ public class AggregateScan implements Scan {
             return accumulator;
         else if(aggfn.equals("count"))
             return count;
+	else if(aggfn.equals("range"))
+	    return count - accumulator;
         else //should be literally impossible to get here
             throw new RuntimeException("Unrecognized aggregate function " + aggfn + ". Length is " + aggfn.length());
     }
@@ -175,7 +249,10 @@ public class AggregateScan implements Scan {
     //It it should, it should be similar to above, just using
     //string comparaters instead of int comparaters
     public String getString(String fldname) {
-        return s.getString(fldname);
+        if(groupByFields.contains(fldname)) {
+            return (String)aggKeys.get(row).get(groupByFields.indexOf(fldname)).asJavaVal();
+        }
+            throw new RuntimeException("field " + fldname + " not found.");
     }
 
     /**

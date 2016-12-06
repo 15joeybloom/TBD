@@ -16,6 +16,7 @@ public class AggregatePlan implements Plan {
    private Schema schema = new Schema();
    private Map<String,String> schemaFields;
    private Map<String,String> schemaAggs;
+   private Collection<String> groupByFields;
    
    /**
     * Creates a new aggregate node in the query tree,
@@ -25,18 +26,29 @@ public class AggregatePlan implements Plan {
     * @param fieldlist the list of fields
     * @param aggfnlist the list of aggregate functions
     */
-    public AggregatePlan(Plan p, Collection<String> fieldlist, Collection<String> aggfns) {
+    public AggregatePlan(Plan p, Collection<String> fieldlist, Collection<String> aggfns,
+        Collection<String> groupByFields) {
       this.p = p;
       this.schemaFields = new HashMap<>();
       this.schemaAggs = new HashMap<>();
+      this.groupByFields = groupByFields;
       Iterator<String> fieldlistIt, aggfnsIt;
       fieldlistIt = fieldlist.iterator();
       aggfnsIt = aggfns.iterator();
       while(fieldlistIt.hasNext() && aggfnsIt.hasNext()) {
         String field = fieldlistIt.next();
         String agg = aggfnsIt.next();
-        String schemaField = agg + "("+field+")";
-         schema.addIntField(schemaField);
+        String schemaField;
+        if(agg == null) {
+            //if it's a regular field, not an aggregate field
+            schemaField = field;
+            schema.add(field, p.schema());
+        }
+        else {
+            //if it's an aggregated field
+            schemaField = agg + "("+field+")";
+             schema.addIntField(schemaField);
+        }
          schemaFields.put(schemaField, field);
          schemaAggs.put(schemaField, agg);
       }
@@ -48,7 +60,7 @@ public class AggregatePlan implements Plan {
     */
    public Scan open() {
       Scan s = p.open();
-      return new AggregateScan(s, schemaFields, schemaAggs);
+      return new AggregateScan(s, schemaFields, schemaAggs, groupByFields);
    }
 
    /**

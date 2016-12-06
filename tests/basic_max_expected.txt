@@ -1,9 +1,0 @@
-
-SQL> 
-select max(majorid) from student
-max(majorid)
-------
-    30
-
-SQL> 
-exit

@@ -1,0 +1,81 @@
+# Our Project
+
+We implemented aggregate functions, Group By, and Having into the SimpleDB architecture. SimpleDB, as it is, does not give the user any overview information about their data. They can select and update individual rows, but there's no way to get summary information about a large dataset. Our project works toward solving that problem.
+
+### How to compile and run
+
+Execute the script compile.sh to compile the project. This will compile the SimpleDB core and also the files in the studentClient directory, which are some example queries provided by the creator of SimpleDB. 
+
+Execute the script [start_student.sh](/start_student.sh) to start the SimpleDB server and create a small set of tables for testing. Then you can execute [run_tests.sh](/run_tests.sh) to query the database using several example queries of our own creation to demonstrate the database's new capabilities.
+
+Alternatively, execute [start_large.sh](/start_large.sh) to start the SimpleDB server and create the same set of tables but with a relatively large amount of data (100s of rows) in the Student and Enroll tables. Then you can execute [largetest1.sh](/largetest1.sh) or [largetest2.sh](/largetest2.sh) to see the efficiency of our implementation.
+
+### What we set out to do
+
+Our goals were to implement several aggregation operators, the Group By clause, and the Having clause. We wanted to be able to execute a query like the following:
+
+```sql
+Select gradyear, count(sid)
+From Student
+Group By gradyear
+Having count(sid) = 2
+```
+This selects all of the graduating classes with two students, and gives the year and number of students.
+
+### What we accomplished
+
+### How We Did It
+
+#### Phase 1 - Aggregation
+Our first goal was to be able to aggregate data without groups. A query that we could evaluate during this phase might have looked like:
+
+```sql
+Select avg(grade), min(grade), max(grade), count(eid)
+From Enroll
+Where studentid = 1
+```
+This calculates student number 1's grade average, their best and worst grade, and the number of grades they have (the number of classes they are enrolled in). Note that at this stage, every field in the Select clause needed to have an aggregation function.
+
+Parsing a query in this phase involved, first and foremost, modifying the Parser to be able to recognize the difference between a regular query and an aggregation query. We modified the Lexer to recognize the different aggregation functions. The Parser then stores the field name and the aggregation function associated with it. We extended the QueryData class for this purpose, creating our AggQueryData class. 
+
+For the query execution, we created two classes - AggregatePlan and AggregateScan. A phase 1 query is guaranteed to have only 1 result tuple, so we begin execution by initializing two integer variables for each field in the result - the accumulator and the count. As we read tuples from the child scan of the AggregateScan, the accumulator for a field stores either the sum of the values, or the minimum/maximum value seen so far, depending on the aggregation function associated with the field. The count variable for a field stores the number of values seen so far, used for the count and avg aggregation functions. After all tuples have been read from the child scan, the AggregateScan reports the summary data.
+
+#### Phase 2 - Group By
+
+Our next goal was to be able to aggregate data with groups. A query that we could evaluate during this phase might have looked like:
+
+```sql
+Select studentid, avg(grade), min(grade), max(grade), count(eid)
+From Enroll
+Group By studentid
+```
+This calculates the grade average, best and worst grade, and number of grades for __each student__
+
+Parsing a query in this phase involved looking for an optional Group By clause after looking for the optional Where clause. Then, if the keywords "Group By" are in the query, we parse the comma-separated list of Group By fields and store the list of fields in an AggQueryData object.
+
+The difference in query execution for this phase is that an aggregation query can now return more than one result tuple. Now we need a list that stores the accumulators and counts for each result tuple. When we read a result tuple from the child scan, we need to check the values of the Group By fields of this tuple to see if we already have accumulators and counts for the group to which this tuple belongs. If the variables exist, then we modify them according to the values of the aggregated fields in the child tuple, otherwise we initialize new accumulators and counts for this new group, creating a new result tuple. After we read the whole child scan, we can then start returning result tuples.
+
+#### Phase 3 - Having
+
+
+
+### Challenges we ran into
+
+### Lessons Learned
+1.
+2.
+3.
+
+### Testing Our Project
+
+For editing it, use this [cheat sheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#headers)
+
+Here's the cool algorithm we used!
+
+```java
+int coolAlgorithm(Table t, Scan s, Query q)
+{
+  return 4;
+}
+```
+

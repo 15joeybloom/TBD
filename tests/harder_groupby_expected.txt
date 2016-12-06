@@ -1,0 +1,5 @@
+ avg(grade)   dname
+-------------------
+         69 compsci
+         88    math
+         85   drama

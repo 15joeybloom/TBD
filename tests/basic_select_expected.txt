@@ -1,17 +1,11 @@
-
-SQL> 
-select majorid from student
-majorid
-------
-    10
-    20
-    10
-    20
-    30
-    20
-    30
-    20
-    10
-
-SQL> 
-exit
+ majorid     sname   sid
+------------------------
+      10       joe     1
+      20       amy     2
+      10       max     3
+      20       sue     4
+      30       bob     5
+      20       kim     6
+      30       art     7
+      20       pat     8
+      10       lee     9

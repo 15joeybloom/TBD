@@ -1,2 +1,1 @@
-select majorid from student
-exit
+select sname, sid, majorid from student
