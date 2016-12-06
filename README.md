@@ -4,6 +4,8 @@ We implemented aggregate functions, Group By, and Having into the SimpleDB archi
 
 ### How to compile and run
 
+During the development process we found the need to execute several bash commands to recompile and restart the server and interpreter to be very tedious. So we wrote a few handy bash scripts to do this for us!
+
 Execute the script compile.sh to compile the project. This will compile the SimpleDB core and also the files in the studentClient directory, which are some example queries provided by the creator of SimpleDB. 
 
 Execute the script [start_student.sh](/start_student.sh) to start the SimpleDB server and create a small set of tables for testing. Then you can execute [run_tests.sh](/run_tests.sh) to query the database using several example queries of our own creation to demonstrate the database's new capabilities.
