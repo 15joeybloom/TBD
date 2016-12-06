@@ -10,6 +10,8 @@ Execute the script [start_student.sh](/start_student.sh) to start the SimpleDB s
 
 Alternatively, execute [start_large.sh](/start_large.sh) to start the SimpleDB server and create the same set of tables but with a relatively large amount of data (100s of rows) in the Student and Enroll tables. Then you can execute [largetest1.sh](/largetest1.sh) or [largetest2.sh](/largetest2.sh) to see the efficiency of our implementation.
 
+With either start_student.sh or start_large.sh, you can execute [run_interpreter.sh](/run_interpreter.sh) to be able to try your own SQL queries.
+
 ### What we set out to do
 
 Our goals were to implement several aggregation operators, the Group By clause, and the Having clause. We wanted to be able to execute a query like the following:
